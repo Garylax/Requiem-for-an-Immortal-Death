@@ -1,3 +1,0 @@
-# Menu du jeu
-- bug touche conservée lors de l'ouverture du Menu
-- pas de deplacement dans le menu avec les touches directionnelles
