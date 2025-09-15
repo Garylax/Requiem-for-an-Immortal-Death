@@ -10,4 +10,4 @@ pygame.init()
 if __name__ == "__main__":
     # Create and run the game
     game = Game()
-    game.run()
+    game.run()  # Start the game loop
