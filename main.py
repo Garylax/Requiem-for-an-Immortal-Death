@@ -3,7 +3,7 @@
 Initializes pygame and starts the main game loop.
 """
 import pygame
-from game import Game
+from src.game import Game
 
 pygame.init()
 

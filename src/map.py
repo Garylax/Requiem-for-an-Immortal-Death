@@ -1,8 +1,10 @@
 import pygame
 from pytmx import load_pygame
 import pyscroll
+from pathlib import Path
 
-from screen import Screen
+from src.screen import Screen
+from src.settings import MAPS_DIR, START_MAP, CAMERA_ZOOM
 
 class Map:
     """Loads Tiled TMX maps and renders them with pyscroll.
@@ -20,7 +22,7 @@ class Map:
         self.map_layer = None
         self.group = None
 
-        self.switch_map('map0')
+        self.switch_map(START_MAP)
         self.player = None
 
     def switch_map(self, map :str):
@@ -29,11 +31,12 @@ class Map:
         Args:
             map (str): Map basename without extension (e.g. "map0").
         """
-        self.tmx_data = load_pygame(f'./assets/maps/{map}.tmx')
+        tmx_path = MAPS_DIR / f'{map}.tmx'
+        self.tmx_data = load_pygame(str(tmx_path))
         map_data = pyscroll.data.TiledMapData(self.tmx_data)
         self.map_layer = pyscroll.BufferedRenderer(map_data, self.screen.get_size())
         self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=7)
-        self.map_layer.zoom = 3
+        self.map_layer.zoom = CAMERA_ZOOM
 
     def add_player(self, player):
         """Add the player sprite to the scrolling group.
@@ -44,8 +47,17 @@ class Map:
         self.group.add(player)
         self.player = player
 
-    def update(self):
-        """Update and draw the scrolling group to the screen."""
-        self.group.update()
+    def update(self, dt: float):
+        """Update sprites and camera.
+
+        Args:
+            dt (float): Delta time in seconds since the last frame, used for
+                framerate-independent sprite updates.
+        """
+        # Propagate dt to sprites; pygame sprites can accept parameters in update()
+        self.group.update(dt)
         self.group.center(self.player.rect.center)
+
+    def render(self, screen: Screen) -> None:
+        """Render the current map and sprites to the screen display."""
         self.group.draw(self.screen.get_display())

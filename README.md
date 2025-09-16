@@ -11,6 +11,7 @@
 -   [Installation](#installation)
 -   [Exécution](#exécution)
 -   [Contrôles](#contrôles)
+-   [Système d'input reconfigurable](#système-dinput-reconfigurable)
 -   [Structure du projet](#structure-du-projet)
 -   [Contenu et assets](#contenu-et-assets)
 -   [Fonctionnalités actuelles](#fonctionnalités-actuelles)
@@ -76,18 +77,61 @@ Remarques:
 -   Pas (encore) de touches dédiées pour Pause/Menu ou Inventaire.
 -   Le déplacement est exclusif (pas de diagonales simultanées).
 
+## Système d'input reconfigurable
+
+Les contrôles sont définis au niveau d’actions (ex: `move_left`, `sprint`) et sont reconfigurables via un fichier JSON.
+
+- Fichier: `config/controls.json`
+- Profil par défaut: `default` (AZERTY + flèches)
+- Exemple de structure:
+
+```json
+{
+  "version": 1,
+  "profiles": {
+    "default": {
+      "move_left": ["K_LEFT", "K_q"],
+      "move_right": ["K_RIGHT", "K_d"],
+      "move_up": ["K_UP", "K_z"],
+      "move_down": ["K_DOWN", "K_s"],
+      "sprint": ["K_LSHIFT"],
+      "pause": ["K_ESCAPE"]
+    }
+  },
+  "active_profile": "default"
+}
+```
+
+Pour rebind via code:
+
+```python
+from input_manager import InputManager
+im = InputManager()
+im.rebind("pause", ["K_p", "K_ESCAPE"])  # remappe l'action "pause"
+im.save()  # persiste dans config/controls.json
+```
+
+L’entité (`entity.py`) lit les actions via `InputManager` (et non plus les touches brutes), ce qui facilite les rebindings et les profils.
+
 ## Structure du projet
 
--   `main.py`: point d’entrée, initialise Pygame et lance la boucle de jeu.
--   `game.py`: contrôleur principal (boucle, input, coordination screen/map/entity).
--   `screen.py`: fenêtre Pygame, timing, FPS.
--   `map.py`: chargement des cartes TMX via PyTMX et rendu via Pyscroll (caméra/scroll).
--   `entity.py`: entité joueur (sprite, déplacement, sprint, orientation).
--   `keylisterner.py`: stockage de l’état des touches pressées.
+-   `main.py`: point d’entrée, importe depuis le package `src/` et lance la boucle de jeu.
+-   `src/`: code applicatif
+    -   `src/game.py`: contrôleur principal (boucle) et gestion d’états (state machine).
+    -   `src/screen.py`: fenêtre Pygame, timing, FPS, calcule `dt` par frame.
+    -   `src/map.py`: gestion de la carte TMX (PyTMX + Pyscroll), méthodes `update(dt)` et `render(...)`.
+    -   `src/entity.py`: entité joueur (sprite, déplacement, sprint, orientation). Mouvement à `dt` constant et diagonales normalisées.
+    -   `src/input_manager.py`: système d’input reconfigurable (actions) avec persistance JSON.
+    -   `src/tools.py`: utilitaires communs (spritesheets, etc.).
+    -   `src/states/`: états du jeu
+        -   `src/states/base_state.py`: classe de base abstraite pour les états.
+        -   `src/states/play_state.py`: état de jeu principal.
 -   `assets/`: ressources du jeu
     -   `assets/maps/`: cartes `.tmx`
     -   `assets/tiles/`: tilesets
     -   `assets/sprites/`: sprites (ex: `player.png`)
+-   `config/`: fichiers de configuration
+    -   `config/controls.json`: bindings des actions
 
 ## Contenu et assets
 
@@ -102,6 +146,10 @@ Remarques:
 -   Rendu défilant avec Pyscroll et caméra centrée sur le joueur.
 -   Entité joueur avec déplacement (flèches et ZQSD) et sprint (Left Shift).
 -   Boucle de jeu Pygame avec capping à 60 FPS.
+-   Mouvement indépendant du framerate via `dt`.
+-   Système d’inputs reconfigurable (JSON) par actions.
+-   Système d’états minimal (`states/`) pour préparer menus et pauses.
+-   Chemins robustes via `pathlib` pour assets/et configs.
 
 ## Roadmap
 

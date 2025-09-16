@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "profiles": {
+    "default": {
+      "move_left": ["K_LEFT", "K_q"],
+      "move_right": ["K_RIGHT", "K_d"],
+      "move_up": ["K_UP", "K_z"],
+      "move_down": ["K_DOWN", "K_s"],
+      "sprint": ["K_LSHIFT"],
+      "pause": ["K_ESCAPE"]
+    }
+  },
+  "active_profile": "default"
+}
